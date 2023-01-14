@@ -1,0 +1,97 @@
+############################## COMMANDS ON DOCKERFILE ###################################
+# specify the language
+FROM python:3.9.7
+
+# The --system flag tells Pipenv to install the dependencies globally,
+# rather than in a virtual environment. The --deploy flag tells Pipenv to use the Pipfile.
+# lock file to determine which specific versions of the dependencies to install, rather
+# than installing the latest versions of the dependencies.
+RUN pip install pipenv
+
+# create a working directory in this container
+# docker will automatically cd into it
+WORKDIR docker-app
+
+# copy pipfile and pipfile.lock file into the current container directory
+# i.e, the docker-app directory (./)
+COPY ["Pipfile", "Pipfile.lock", "./"]
+
+# You need to use --system flag, so it will install all packages into the system python, and not into the virtualenv. Since docker containers do not need to have virtualenvs
+# You need to use --deploy flag, so your build will fail if your Pipfile.lock is out of date
+# You need to use --ignore-pipfile, so it won't mess with our setup
+RUN pipenv install --system --deploy --ignore-pipfile
+
+# copy the important files we need in the docker container docker-app directory
+COPY ["server.py", "model_c=0.1.bin", "./"]
+
+# The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime
+# in this case: 8080
+# Writing EXPOSE in Dockerfile, is merely a hint that a certain port is useful.
+# Docker won’t do anything with that information by itself.
+# the -p flag can be used with the EXPOSE command
+# If we EXPOSE and -p a port, the service in the container is accessible from anywhere,
+# even outside Docker host.
+# Now expose docker container port:
+EXPOSE 8080
+
+# CMD instruction specifies the default program that will execute once the container runs.
+# A quick point to note: CMD commands will only be utilized when command-line arguments are missing.
+# on running this command: $ docker run <image> hostname, the program in the CMD will be ignored
+# because of the argument 'hostname' and so the 'hostname' of the container will be executed
+CMD ["python", "server.py"]
+
+# unlike CMD instruction, even with the argument, the program in the entry point will not be ignored
+ENTRYPOINT ["python", "server.py"]
+
+
+################################ DOCKER FROM TERMINAL #########################
+
+# Tells the Docker Daemon to build an image from docker file
+# docker build: builds images from docker file within the current directory
+# -t sets the tag name of the image
+>>> docker build -t <image-name> .
+
+# docker run: creates a new container from an image
+>>> docker run <image-name:version>
+
+# docker start: to start already created container that was stopped
+>>> docker start <container-id>
+
+# to create an image
+# and start a container in detached mode to use terminal again: container id is printed
+>>> docker run -d <image-name>
+
+# to stop a container from running using the container id (it can be the first 3 id numbers or full id)
+>>> docker stop <container-id>
+
+# to bind the host machine port and the container port using the -p (--publish) flag
+>>> docker run -p<host-port>:<container-port> <image-name>
+
+# change the default container name created by docker using the --name flag
+# run it in detach mode using the -d flag
+>>> docker run -p<host-port>:<container-port> -d --name <container-new> <image-name>
+
+# to see all the running containers
+# >>> docker ps
+
+# to see all containers that exist but are stopped from running
+>>> docker ps -a
+
+# to pull (create on local machine) image from dockerhub (repository) and start it right away
+>>> docker run <image-name:image-version>
+
+# to pull image from dockerhub (repository) without starting it right away
+>>> docker pull <image-name:image-version>
+
+# print all local images
+# >>> docker images
+
+########################## DEBUG A CONTAINER #########################
+# to debug container
+>>> docker logs <container-name/container-id>
+
+# to have access to the container so as to be able to debug and see everything in the container
+>>> docker exec -it <container-name/container-id> /bin/bash
+
+# to exit docker bash terminal
+# >>> exit

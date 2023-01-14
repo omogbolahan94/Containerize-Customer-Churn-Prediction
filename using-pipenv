@@ -1,0 +1,25 @@
+This file is about how to using pipenv as a package manager
+
+# Install pipenv from pip
+>>> pip install pipenv
+
+# Install the required packages needed by the project using pipenv (you can install any dependencies any time)
+# this will also create a virtual environment for us with Pipfile and Pipfile.lock files
+>>> pipenv install numpy scikit-learn==0.24.2 flask
+
+# activate the pipenv environment variable
+>>> pipenv shell
+
+# Who ever clones this project can use the exact dependencies on their local machine my just using the command:
+>>> pipenv install
+
+# to get the location of current pipenv virtual environment
+>>> pipenv --venv
+
+################ ASSUMMING WE ARE USING VENV ####################
+# We can create a requirement.txt file. This file will contain all dependencies in the venv virtual environment
+and their versions on a separate line
+
+# the command to create this file is:
+# >>> pip freeze > requirement.text
+
